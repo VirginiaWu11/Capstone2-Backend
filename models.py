@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
+
 def connect_db(app):
     db.app = app
     db.init_app(app)
@@ -28,7 +29,7 @@ class User(db.Model):
             "lastName": self.last_name,
             "email": self.email,
         }
-    
+
     @classmethod
     def signup(
         cls,
@@ -76,13 +77,13 @@ class User(db.Model):
     @classmethod
     def update_user(cls, username, first_name, last_name, email):
         user = cls.query.filter_by(username=username).first()
-        print("******************",first_name, last_name, email)
         user.first_name = first_name
         user.last_name = last_name
         user.email = email
         db.session.commit()
         return user
-    
+
+
 class Asset(db.Model):
     """Asset Model"""
 
@@ -93,7 +94,9 @@ class Asset(db.Model):
         db.ForeignKey("users.username", ondelete="CASCADE"),
         nullable=False,
     )
-    coin_id = db.Column(db.Text, nullable=False)
+    coin_id = db.Column(
+        db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"), nullable=False
+    )
     quantity = db.Column(db.Float, nullable=False)
 
     def serialize(self):
@@ -101,7 +104,55 @@ class Asset(db.Model):
         return {
             "username": self.username,
             "quantity": self.quantity,
+            "coin_id": self.coin_id,
         }
 
     def __repr__(self):
         return f"<Transaction id={self.id} username={self.username} quantity={self.quantity}>"
+
+
+class Pins(db.Model):
+    """Pins Model"""
+
+    __tablename__ = "pins"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(
+        db.Text,
+        db.ForeignKey("users.username", ondelete="CASCADE"),
+        nullable=False,
+    )
+    coin_id = db.Column(
+        db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"), nullable=False
+    )
+
+    def serialize(self):
+        """Returns a dictionary representation of pins to turn into JSON"""
+        return {
+            "username": self.username,
+            "coin_id": self.coin_id,
+        }
+
+    def __repr__(self):
+        return f"<Transaction id={self.id} username={self.username} coin_id={self.coin_id}>"
+
+
+class Coins(db.Model):
+    """Coins Model"""
+
+    __tablename__ = "coins"
+    coin_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    symbol = db.Column(db.Text, nullable=False)
+    coin_gecko_id = db.Column(db.Text, nullable=False)
+
+    def serialize(self):
+        """Returns a dictionary representation of coins to turn into JSON"""
+        return {
+            "coin_id": self.coin_id,
+            "name": self.name,
+            "symbol": self.symbol,
+            "coin_gecko_id": self.coin_gecko_id,
+        }
+
+    def __repr__(self):
+        return f"<Transaction id={self.id} name={self.name} symbol={self.symbol} coin_id={self.coin_id}>"
