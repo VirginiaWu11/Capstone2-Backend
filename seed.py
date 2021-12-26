@@ -1,5 +1,6 @@
 from app import app
-from models import db, User, Asset
+from models import db, User, Asset, Pins, Coins
+from csv import DictReader
 
 db.drop_all()
 db.create_all()
@@ -13,12 +14,16 @@ user1 = User(
 )
 # password is: testuser
 
-asset1 = Asset(
-    username="testuser1",
-    quantity=500,
-    coin_id="bitcoin",
-)
+# asset1 = Asset(
+#     username="testuser1",
+#     quantity=500,
+#     coin_id="bitcoin",
+# )
 
+"""Seed database from coins.csv file."""
+
+with open("generator/coins.csv") as coins:
+    db.session.bulk_insert_mappings(Coins, DictReader(coins))
 
 db.session.add_all(
     [
@@ -28,10 +33,10 @@ db.session.add_all(
 db.session.commit()
 
 
-db.session.add_all(
-    [
-        asset1,
-    ]
-)
+# db.session.add_all(
+#     [
+#         asset1,
+#     ]
+# )
 
 db.session.commit()
