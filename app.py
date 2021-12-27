@@ -45,10 +45,16 @@ def signup():
             )
 
         token = create_access_token(identity={"username": user.username})
+
         return {"token": token}, 200
 
     except IntegrityError as e:
-        return jsonify({'error':{'message':'User Already Exists'}}), 400
+        if 'duplicate key value violates unique constraint "users_pkey"' in str(e.orig):
+            return jsonify({'error':{'message':'Username Already Exists'}}), 400
+        elif 'duplicate key value violates unique constraint "users_email_key"' in str(e.orig):
+            return jsonify({'error':{'message':'Email Already Exists'}}), 400
+        return jsonify({'error':{'message':'Database Error'}}), 400
+
 
 @app.route("/auth/login", methods=["GET", "POST"])
 def login():

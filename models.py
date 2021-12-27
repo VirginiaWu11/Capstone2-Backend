@@ -18,7 +18,7 @@ class User(db.Model):
     username = db.Column(db.Text, primary_key=True)
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
-    email = db.Column(db.Text, nullable=False)
+    email = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
     def serialize(self):
