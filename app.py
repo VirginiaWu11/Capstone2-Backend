@@ -6,7 +6,7 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
-from models import db, connect_db, User, Asset
+from models import db, connect_db, User, Asset, Coins, Pins
 from sqlalchemy.exc import IntegrityError
 from flask_cors import CORS
 
@@ -69,13 +69,13 @@ def login():
         return jsonify({'error':{'message':'Incorrect username or password'}}), 400
 
 # protected route
-@app.route('/protected', methods=['GET'])
-@jwt_required()
-def test():
-    user = get_jwt_identity()
-    username = user['username']
-    print(user)
-    return f'Welcome to the protected route {username}!', 200
+# @app.route('/protected', methods=['GET'])
+# @jwt_required()
+# def test():
+#     user = get_jwt_identity()
+#     username = user['username']
+#     print(user)
+#     return f'Welcome to the protected route {username}!', 200
  
 @app.route('/users/<username>', methods=['GET'])
 @jwt_required()
@@ -92,9 +92,36 @@ def update_current_user(username):
     first_name = request.json.get('firstName', None),
     last_name = request.json.get('lastName', None),
     email = request.json.get('email', None),
-
     user = User.update_user(username, first_name, last_name, email)
     print(user.serialize())
     return jsonify({"user": user.serialize()}), 201
   
- 
+@app.route('/users/pin/<coin_gecko_id>', methods=['POST'])
+@jwt_required()
+def pin_to_watchlist(coin_gecko_id):
+    """Pin coin to logged in user's watchlist."""
+    user = get_jwt_identity()
+    username = user['username']
+    db_coin = Coins.get_coin_by_coin_gecko_id(coin_gecko_id)
+    pin = Pins.pin_coin_to_watchlist(username,db_coin.coin_id) 
+    print(pin, "****************************************************************")
+    return jsonify({"pin":pin.serialize()}), 200
+
+@app.route('/users/unpin/<coin_gecko_id>', methods=['POST'])
+@jwt_required()
+def unpin_from_watchlist(coin_gecko_id):
+    """Unpin coin from logged in user's watchlist."""
+    user = get_jwt_identity()
+    username = user['username']
+    db_coin = Coins.get_coin_by_coin_gecko_id(coin_gecko_id)
+    Pins.unpin_coin_from_watchlist(username,db_coin.coin_id)
+    return username, 200
+
+@app.route('/watchlist', methods=['GET'])
+@jwt_required()
+def get_user_watchlist():
+    """Show list of coins this user is watching."""
+    user = get_jwt_identity()
+    username = user['username']
+    pins = Pins.get_pins_by_user(username)
+    return jsonify({"pins":Pins.serialize_list(pins)}), 200

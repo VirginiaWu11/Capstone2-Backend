@@ -20,6 +20,27 @@ user1 = User(
 #     coin_id="bitcoin",
 # )
 
+pin1 = Pins(
+    username="testuser1",
+    coin_id=1498,
+)
+pin2 = Pins(
+    username="testuser1",
+    coin_id=1499,
+)
+pin3 = Pins(
+    username="testuser1",
+    coin_id=300,
+)
+pin4 = Pins(
+    username="testuser1",
+    coin_id=200,
+)
+pin5 = Pins(
+    username="testuser1",
+    coin_id=100,
+)
+
 """Seed database from coins.csv file."""
 
 with open("generator/coins.csv") as coins:
@@ -33,10 +54,10 @@ db.session.add_all(
 db.session.commit()
 
 
-# db.session.add_all(
-#     [
-#         asset1,
-#     ]
-# )
+db.session.add_all(
+    [
+        pin1,pin2,pin3,pin4,pin5
+    ]
+)
 
 db.session.commit()

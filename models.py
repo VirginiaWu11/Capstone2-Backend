@@ -98,6 +98,8 @@ class Asset(db.Model):
         db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"), nullable=False
     )
     quantity = db.Column(db.Float, nullable=False)
+    user = db.relationship('User', backref='assets')
+    coin = db.relationship('Coins', backref='assets')
 
     def serialize(self):
         """Returns a dictionary representation of Asset to turn into JSON"""
@@ -115,25 +117,53 @@ class Pins(db.Model):
     """Pins Model"""
 
     __tablename__ = "pins"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
     username = db.Column(
         db.Text,
         db.ForeignKey("users.username", ondelete="CASCADE"),
+        primary_key=True,
         nullable=False,
     )
     coin_id = db.Column(
-        db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"), nullable=False
+        db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"),primary_key=True, nullable=False
     )
+    user = db.relationship('User', backref='pins')
+    coin = db.relationship('Coins', backref='pins')
 
     def serialize(self):
         """Returns a dictionary representation of pins to turn into JSON"""
-        return {
-            "username": self.username,
-            "coin_id": self.coin_id,
-        }
+        # return {
+        #     "username": self.username,
+        #     "coin_id": self.coin_id,
+        #     "coin_gecko_id":self.coin.coin_gecko_id,
+        # }
+        return self.coin.coin_gecko_id
 
+    
     def __repr__(self):
-        return f"<Transaction id={self.id} username={self.username} coin_id={self.coin_id}>"
+        return f"<Transaction username={self.username} coin_id={self.coin_id}>"
+
+    @classmethod
+    def serialize_list(cls,list):
+        return [item.serialize() for item in list]
+            
+    @classmethod
+    def get_pins_by_user(cls, username):
+        return cls.query.filter_by(username=username).all()
+
+    @classmethod
+    def pin_coin_to_watchlist(cls, username, coin_id):
+        pin = Pins(username = username, coin_id = coin_id)
+        db.session.add(pin)
+        db.session.commit()
+        return pin
+
+    @classmethod
+    def unpin_coin_from_watchlist(cls, username, coin_id):
+        pin = cls.query.filter_by(username=username, coin_id=coin_id).first()
+        db.session.delete(pin)
+        db.session.commit()
+        return pin
 
 
 class Coins(db.Model):
@@ -155,4 +185,13 @@ class Coins(db.Model):
         }
 
     def __repr__(self):
-        return f"<Transaction id={self.id} name={self.name} symbol={self.symbol} coin_id={self.coin_id}>"
+        return f"<Transaction id={self.coin_id} name={self.name} symbol={self.symbol} coin_id={self.coin_id}>"
+
+    @classmethod
+    def get_coin_by_coin_gecko_id(cls, coin_gecko_id):
+        return cls.query.filter_by(coin_gecko_id=coin_gecko_id).first()
+
+    @classmethod
+    def get_coin_by_coin_id(cls, coin_id):
+        return cls.query.filter_by(coin_id=coin_id).first()
+
