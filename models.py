@@ -178,10 +178,10 @@ class Coins(db.Model):
     def serialize(self):
         """Returns a dictionary representation of coins to turn into JSON"""
         return {
-            "coin_id": self.coin_id,
+            "coinId": self.coin_id,
             "name": self.name,
             "symbol": self.symbol,
-            "coin_gecko_id": self.coin_gecko_id,
+            "coinGeckoId": self.coin_gecko_id,
         }
 
     def __repr__(self):
@@ -197,5 +197,6 @@ class Coins(db.Model):
 
     @classmethod
     def search_coins(cls, search):
-        return cls.query.filter(cls.coin_gecko_id.contains(search))
+        search = "%{}%".format("".join(search))
+        return cls.query.filter(cls.name.ilike(search)).all()
 

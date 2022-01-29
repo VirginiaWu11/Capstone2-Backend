@@ -130,7 +130,7 @@ def get_user_watchlist():
 @jwt_required()
 def search_coins():
     "Search for coins in the coins table"
-    search = request.json.get('search', None),
+    search = request.args.get('search', None),
     coins = Coins.search_coins(search)
     coins_array=[Coins.serialize(coin) for coin in coins]
     return jsonify({"coins":coins_array})
