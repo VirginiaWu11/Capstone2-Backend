@@ -125,3 +125,13 @@ def get_user_watchlist():
     username = user['username']
     pins = Pins.get_pins_by_user(username)
     return jsonify({"pins":Pins.serialize_list(pins)}), 200
+
+@app.route('/coins/search', methods=['GET'])
+@jwt_required()
+def search_coins():
+    "Search for coins in the coins table"
+    search = request.json.get('search', None),
+    coins = Coins.search_coins(search)
+    coins_array=[Coins.serialize(coin) for coin in coins]
+    return jsonify({"coins":coins_array})
+    

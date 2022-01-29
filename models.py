@@ -195,3 +195,7 @@ class Coins(db.Model):
     def get_coin_by_coin_id(cls, coin_id):
         return cls.query.filter_by(coin_id=coin_id).first()
 
+    @classmethod
+    def search_coins(cls, search):
+        return cls.query.filter(cls.coin_gecko_id.contains(search))
+
