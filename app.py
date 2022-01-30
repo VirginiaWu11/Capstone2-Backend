@@ -50,10 +50,10 @@ def signup():
 
     except IntegrityError as e:
         if 'duplicate key value violates unique constraint "users_pkey"' in str(e.orig):
-            return jsonify({'error':{'message':'Username Already Exists'}}), 400
+            return jsonify({'msg':'Username Already Exists'}), 400
         elif 'duplicate key value violates unique constraint "users_email_key"' in str(e.orig):
-            return jsonify({'error':{'message':'Email Already Exists'}}), 400
-        return jsonify({'error':{'message':'Database Error'}}), 400
+            return jsonify({'msg':'Email Already Exists'}), 400
+        return jsonify({'msg':'Database Error'}), 400
 
 
 @app.route("/auth/login", methods=["GET", "POST"])
@@ -66,7 +66,7 @@ def login():
         return {"token": token}, 200
     
     except AttributeError:
-        return jsonify({'error':{'message':'Incorrect username or password'}}), 400
+        return jsonify({'msg':'Incorrect username or password'}), 400
 
 # protected route
 # @app.route('/protected', methods=['GET'])
