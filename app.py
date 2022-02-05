@@ -126,6 +126,35 @@ def get_user_watchlist():
     pins = Pins.get_pins_by_user(username)
     return jsonify({"pins":Pins.serialize_list(pins)}), 200
 
+@app.route('/users/addassets/<coin_gecko_id>/<quantity>', methods=['POST'])
+@jwt_required()
+def add_to_portfolio(coin_gecko_id, quantity):
+    """Add coin to logged in user's portfolio."""
+    user = get_jwt_identity()
+    username = user['username']
+    db_coin = Coins.get_coin_by_coin_gecko_id(coin_gecko_id)
+    asset = Asset.add_coin_to_portfolio(username,db_coin.coin_id, quantity ) 
+    return jsonify({"asset":asset.serialize()}), 200
+
+@app.route('/users/removeassets/<coin_gecko_id>', methods=['POST'])
+@jwt_required()
+def remove_from_portfolio(coin_gecko_id):
+    """Remove coin from logged in user's portfolio."""
+    user = get_jwt_identity()
+    username = user['username']
+    db_coin = Coins.get_coin_by_coin_gecko_id(coin_gecko_id)
+    Asset.remove_coin_from_portfolio(username,db_coin.coin_id)
+    return username, 200
+
+@app.route('/portfolio', methods=['GET'])
+@jwt_required()
+def get_user_portfolio():
+    """Show list of assets user's assets."""
+    user = get_jwt_identity()
+    username = user['username']
+    assets = Asset.get_assets_by_user(username)
+    return jsonify({"assets":Asset.serialize_list(assets)}), 200
+
 @app.route('/coins/search', methods=['GET'])
 @jwt_required()
 def search_coins():

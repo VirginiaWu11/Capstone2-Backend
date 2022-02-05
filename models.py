@@ -112,6 +112,28 @@ class Asset(db.Model):
     def __repr__(self):
         return f"<Transaction id={self.id} username={self.username} quantity={self.quantity}>"
 
+    @classmethod
+    def serialize_list(cls,list):
+        return [item.serialize() for item in list]
+            
+    @classmethod
+    def get_assets_by_user(cls, username):
+        return cls.query.filter_by(username=username).all()
+
+    @classmethod
+    def add_coin_to_portfolio(cls, username, coin_id, quantity):
+        asset = Asset(username = username, coin_id = coin_id, quantity = quantity)
+        db.session.add(asset)
+        db.session.commit()
+        return asset
+
+    @classmethod
+    def remove_coin_from_portfolio(cls, username, coin_id):
+        asset = cls.query.filter_by(username=username, coin_id=coin_id).first()
+        db.session.delete(asset)
+        db.session.commit()
+        return asset
+
 
 class Pins(db.Model):
     """Pins Model"""
@@ -164,7 +186,6 @@ class Pins(db.Model):
         db.session.delete(pin)
         db.session.commit()
         return pin
-
 
 class Coins(db.Model):
     """Coins Model"""
