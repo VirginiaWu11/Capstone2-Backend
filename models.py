@@ -104,7 +104,6 @@ class Asset(db.Model):
     def serialize(self):
         """Returns a dictionary representation of Asset to turn into JSON"""
         return {
-            "username": self.username,
             "quantity": self.quantity,
             "coin_id": self.coin_id,
         }
