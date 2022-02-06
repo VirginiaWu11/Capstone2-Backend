@@ -126,7 +126,7 @@ def get_user_watchlist():
     pins = Pins.get_pins_by_user(username)
     return jsonify({"pins":Pins.serialize_list(pins)}), 200
 
-@app.route('/users/addassets/<coin_gecko_id>/<quantity>', methods=['POST'])
+@app.route('/users/addasset/<coin_gecko_id>/<quantity>', methods=['POST'])
 @jwt_required()
 def add_to_portfolio(coin_gecko_id, quantity):
     """Add coin to logged in user's portfolio."""
@@ -136,7 +136,7 @@ def add_to_portfolio(coin_gecko_id, quantity):
     asset = Asset.add_coin_to_portfolio(username,db_coin.coin_id, quantity ) 
     return jsonify({"asset":asset.serialize()}), 200
 
-@app.route('/users/removeassets/<coin_gecko_id>', methods=['POST'])
+@app.route('/users/removeasset/<coin_gecko_id>', methods=['POST'])
 @jwt_required()
 def remove_from_portfolio(coin_gecko_id):
     """Remove coin from logged in user's portfolio."""
