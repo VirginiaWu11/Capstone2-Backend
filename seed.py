@@ -54,10 +54,6 @@ db.session.add_all(
 db.session.commit()
 
 
-db.session.add_all(
-    [
-        pin1,pin2,pin3,pin4,pin5
-    ]
-)
+db.session.add_all([pin1, pin2, pin3, pin4, pin5])
 
 db.session.commit()

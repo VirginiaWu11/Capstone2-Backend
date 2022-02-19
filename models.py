@@ -98,30 +98,30 @@ class Asset(db.Model):
         db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"), nullable=False
     )
     quantity = db.Column(db.Float, nullable=False)
-    user = db.relationship('User', backref='assets')
-    coin = db.relationship('Coins', backref='assets')
+    user = db.relationship("User", backref="assets")
+    coin = db.relationship("Coins", backref="assets")
 
     def serialize(self):
         """Returns a dictionary representation of Asset to turn into JSON"""
         return {
             "quantity": self.quantity,
-            "coin_id": self.coin_id,
+            "coinGeckoId": self.coin.coin_gecko_id,
         }
 
     def __repr__(self):
         return f"<Transaction id={self.id} username={self.username} quantity={self.quantity}>"
 
     @classmethod
-    def serialize_list(cls,list):
+    def serialize_list(cls, list):
         return [item.serialize() for item in list]
-            
+
     @classmethod
     def get_assets_by_user(cls, username):
         return cls.query.filter_by(username=username).all()
 
     @classmethod
     def add_coin_to_portfolio(cls, username, coin_id, quantity):
-        asset = Asset(username = username, coin_id = coin_id, quantity = quantity)
+        asset = Asset(username=username, coin_id=coin_id, quantity=quantity)
         db.session.add(asset)
         db.session.commit()
         return asset
@@ -146,35 +146,33 @@ class Pins(db.Model):
         nullable=False,
     )
     coin_id = db.Column(
-        db.Integer, db.ForeignKey("coins.coin_id", ondelete="CASCADE"),primary_key=True, nullable=False
+        db.Integer,
+        db.ForeignKey("coins.coin_id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
     )
-    user = db.relationship('User', backref='pins')
-    coin = db.relationship('Coins', backref='pins')
+    user = db.relationship("User", backref="pins")
+    coin = db.relationship("Coins", backref="pins")
 
     def serialize(self):
         """Returns a dictionary representation of pins to turn into JSON"""
-        # return {
-        #     "username": self.username,
-        #     "coin_id": self.coin_id,
-        #     "coin_gecko_id":self.coin.coin_gecko_id,
-        # }
+
         return self.coin.coin_gecko_id
 
-    
     def __repr__(self):
         return f"<Transaction username={self.username} coin_id={self.coin_id}>"
 
     @classmethod
-    def serialize_list(cls,list):
+    def serialize_list(cls, list):
         return [item.serialize() for item in list]
-            
+
     @classmethod
     def get_pins_by_user(cls, username):
         return cls.query.filter_by(username=username).all()
 
     @classmethod
     def pin_coin_to_watchlist(cls, username, coin_id):
-        pin = Pins(username = username, coin_id = coin_id)
+        pin = Pins(username=username, coin_id=coin_id)
         db.session.add(pin)
         db.session.commit()
         return pin
@@ -185,6 +183,7 @@ class Pins(db.Model):
         db.session.delete(pin)
         db.session.commit()
         return pin
+
 
 class Coins(db.Model):
     """Coins Model"""
@@ -219,4 +218,3 @@ class Coins(db.Model):
     def search_coins(cls, search):
         search = "%{}%".format("".join(search))
         return cls.query.filter(cls.name.ilike(search)).all()
-
