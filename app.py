@@ -36,7 +36,7 @@ connect_db(app)
 def signup():
     """Sign up user."""
     try:
-        user = User.signup(
+        username = User.signup(
             username=request.json.get("username", None),
             first_name=request.json.get("firstName", None),
             last_name=request.json.get("lastName", None),
@@ -44,44 +44,27 @@ def signup():
             password=request.json.get("password", None),
         )
 
-        token = create_access_token(identity={"username": user.username})
+        token = create_access_token(identity={"username": username})
 
         return {"token": token}, 200
 
-    except IntegrityError as e:
-        if 'duplicate key value violates unique constraint "users_pkey"' in str(e.orig):
-            return jsonify({"msg": "Username Already Exists"}), 400
-        elif 'duplicate key value violates unique constraint "users_email_key"' in str(
-            e.orig
-        ):
-            return jsonify({"msg": "Email Already Exists"}), 400
-        return jsonify({"msg": "Database Error"}), 400
-
+    except Exception as e:
+        print("*****e",e)
+        return jsonify({"msg": f"{e}"}), 400
 
 @app.route("/auth/login", methods=["GET", "POST"])
 def login():
     """Handle user login."""
 
     try:
-        user = User.authenticate(
+        username = User.authenticate(
             request.json.get("username", None), request.json.get("password", None)
         )
-        token = create_access_token(identity={"username": user.username})
+        token = create_access_token(identity={"username": username})
         return {"token": token}, 200
 
     except AttributeError:
         return jsonify({"msg": "Incorrect username or password"}), 400
-
-
-# protected route
-# @app.route('/protected', methods=['GET'])
-# @jwt_required()
-# def test():
-#     user = get_jwt_identity()
-#     username = user['username']
-#     print(user)
-#     return f'Welcome to the protected route {username}!', 200
-
 
 @app.route("/users/<username>", methods=["GET"])
 @jwt_required()

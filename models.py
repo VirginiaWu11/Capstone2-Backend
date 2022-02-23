@@ -42,6 +42,15 @@ class User(db.Model):
         """Sign up user.
         Hashes password and adds user to system.
         """
+        user = cls.query.filter_by(username=username).first()
+
+        if user:
+            raise Exception("Username Already Exists") 
+
+        user = cls.query.filter_by(email=email).first()
+        
+        if user:
+            raise Exception("Email Already Exists") 
 
         hashed_pwd = bcrypt.generate_password_hash(password).decode("UTF-8")
 
@@ -55,7 +64,7 @@ class User(db.Model):
 
         db.session.add(user)
         db.session.commit()
-        return user
+        return user.username
 
     @classmethod
     def authenticate(cls, username, password):
@@ -66,7 +75,7 @@ class User(db.Model):
         if user:
             is_auth = bcrypt.check_password_hash(user.password, password)
             if is_auth:
-                return user
+                return user.username
 
         return False
 
